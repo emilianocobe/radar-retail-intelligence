@@ -1,0 +1,1086 @@
+<meta charset="utf-8">
+<title>Radar Retail Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --surface-2:#E9EDF2; --line:#D5DCE4; --line-soft:#E2E7EE;
+  --ink:#131C26; --ink-2:#46545F; --ink-3:#71808C;
+  --accent:#2E6FE0; --accent-ink:#1D50A8; --accent-soft:#DCE7FA;
+  --invert-bg:#131C26; --invert-ink:#F2F5F9; --invert-ink-2:#9FAEBC;
+  --c-euler:#2E6FE0; --c-keengo:#D9542B; --c-rnext:#8A4FBF; --c-rcheck:#148A73; --c-senso:#A98A1F;
+  --good:#177A4C; --warn:#B0680F; --crit:#B3383B;
+  --grid:#DAE0E8; --shadow:0 1px 2px rgba(19,28,38,.06),0 8px 28px -12px rgba(19,28,38,.14);
+  --r:10px;
+  --f-disp:"Archivo",system-ui,sans-serif;
+  --f-serif:"Source Serif 4",Georgia,serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151D; --surface:#141A22; --surface-2:#1A222C; --line:#2A3542; --line-soft:#222C37;
+    --ink:#E8EDF3; --ink-2:#A6B3BF; --ink-3:#7A8894;
+    --accent:#4C82E8; --accent-ink:#8FB2F2; --accent-soft:#1B2C4A;
+    --invert-bg:#E8EDF3; --invert-ink:#131C26; --invert-ink-2:#46545F;
+    --c-euler:#4C82E8; --c-keengo:#D96F3F; --c-rnext:#9C6BD0; --c-rcheck:#1F9C82; --c-senso:#AD8D2E;
+    --good:#3FA372; --warn:#C98A3D; --crit:#D06A6C;
+    --grid:#242F3B; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151D; --surface:#141A22; --surface-2:#1A222C; --line:#2A3542; --line-soft:#222C37;
+  --ink:#E8EDF3; --ink-2:#A6B3BF; --ink-3:#7A8894;
+  --accent:#4C82E8; --accent-ink:#8FB2F2; --accent-soft:#1B2C4A;
+  --invert-bg:#E8EDF3; --invert-ink:#131C26; --invert-ink-2:#46545F;
+  --c-euler:#4C82E8; --c-keengo:#D96F3F; --c-rnext:#9C6BD0; --c-rcheck:#1F9C82; --c-senso:#AD8D2E;
+  --good:#3FA372; --warn:#C98A3D; --crit:#D06A6C;
+  --grid:#242F3B; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);
+}
+
+/* ============ BASE ============ */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-serif);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-disp);line-height:1.08;margin:0;text-wrap:balance}
+p{margin:0 0 1em}
+a{color:var(--accent-ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(18px,4vw,44px)}
+.prose{max-width:66ch}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow b{color:var(--accent-ink);font-weight:600}
+section{padding:clamp(56px,8vw,104px) 0}
+.sec-head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,52px)}
+.sec-head h2{font-size:clamp(1.9rem,4.4vw,3.2rem);font-weight:800;letter-spacing:-.02em}
+.sec-head .lede{font-size:1.1rem;color:var(--ink-2);max-width:62ch}
+.num{font-variant-numeric:tabular-nums}
+svg{display:block}
+.scrollx{overflow-x:auto}
+
+/* ============ TOPBAR / ROADMAP ============ */
+#topbar{position:fixed;inset:0 0 auto 0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+#topbar .in{max-width:1180px;margin:0 auto;padding:0 clamp(18px,4vw,44px);height:54px;display:flex;align-items:center;gap:18px}
+#topbar .brand{font-family:var(--f-disp);font-weight:900;font-size:.95rem;letter-spacing:-.01em;white-space:nowrap}
+#topbar .brand span{color:var(--accent-ink)}
+#topbar nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+#topbar nav::-webkit-scrollbar{display:none}
+#topbar nav a{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink-3);padding:6px 9px;border-radius:6px;white-space:nowrap}
+#topbar nav a.on{color:var(--accent-ink);background:var(--accent-soft)}
+#progress{position:absolute;left:0;bottom:-1px;height:2px;background:var(--accent);width:0%;transition:width .1s linear}
+@media(max-width:760px){#topbar nav{display:none}}
+
+/* ============ HERO ============ */
+#hero{padding:0;position:relative;background:var(--bg)}
+#hero .stage{position:relative;min-height:92vh;display:flex;flex-direction:column;justify-content:flex-end;padding:120px 0 40px;overflow:hidden}
+#gatecanvas{position:absolute;inset:0;width:100%;height:100%;}
+#hero .content{position:relative;z-index:2}
+#hero h1{font-size:clamp(2.6rem,8.4vw,7rem);font-weight:900;letter-spacing:-.035em;text-transform:uppercase;line-height:.95}
+#hero h1 .thin{display:block;font-weight:500;letter-spacing:.02em;font-size:.32em;text-transform:none;color:var(--ink-2);margin-top:14px;font-family:var(--f-serif)}
+#hero .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+#hero .live{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line);border-radius:99px;padding:6px 14px;background:var(--surface)}
+#hero .live .dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#hero .stats{display:flex;flex-wrap:wrap;gap:0;margin-top:44px;border-top:1px solid var(--line)}
+#hero .stat{flex:1 1 150px;padding:18px 22px 6px 0;border-right:1px solid var(--line-soft)}
+#hero .stat:last-child{border-right:0}
+#hero .stat .v{font-family:var(--f-disp);font-weight:800;font-size:clamp(1.5rem,3.2vw,2.3rem);letter-spacing:-.02em}
+#hero .stat .l{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:2px}
+
+/* ============ TRANSITION SLIDES ============ */
+.slide{background:var(--invert-bg);color:var(--invert-ink);padding:clamp(56px,9vw,120px) 0;position:relative;overflow:hidden}
+.slide .n{position:absolute;right:-.05em;top:50%;transform:translateY(-50%);font-family:var(--f-disp);font-weight:900;font-size:clamp(10rem,28vw,24rem);line-height:1;color:transparent;-webkit-text-stroke:1px var(--invert-ink-2);opacity:.35;user-select:none;pointer-events:none}
+.slide .eyebrow{color:var(--invert-ink-2)}
+.slide h2{font-size:clamp(2rem,5.4vw,4rem);font-weight:900;letter-spacing:-.03em;max-width:16ch;margin-top:14px}
+.slide p{color:var(--invert-ink-2);max-width:52ch;margin:18px 0 0;font-size:1.05rem}
+
+/* ============ CARDS ============ */
+.grid{display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:24px;box-shadow:var(--shadow)}
+.card h3{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
+.insights{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.insight{position:relative;padding-top:20px}
+.insight .tag{position:absolute;top:-12px;left:20px;font-family:var(--f-mono);font-size:.64rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:#fff;padding:4px 10px;border-radius:5px}
+.insight .big{font-family:var(--f-disp);font-weight:800;font-size:2.2rem;letter-spacing:-.02em;margin:6px 0 4px}
+.insight p{color:var(--ink-2);font-size:.95rem;margin:0}
+
+/* custom bullets */
+ul.tally{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+ul.tally li{position:relative;padding-left:26px;font-size:.96rem;color:var(--ink-2)}
+ul.tally li::before{content:"";position:absolute;left:0;top:.42em;width:12px;height:12px;border:2px solid var(--accent);border-radius:3px;transform:rotate(45deg)}
+ul.tally li b{color:var(--ink);font-weight:600}
+ul.tick{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+ul.tick li{position:relative;padding-left:24px;font-size:.93rem;color:var(--ink-2)}
+ul.tick li::before{content:"";position:absolute;left:2px;top:.5em;width:10px;height:5px;border-left:2px solid var(--good);border-bottom:2px solid var(--good);transform:rotate(-45deg)}
+ul.cross li::before{border-color:var(--crit);transform:rotate(45deg);width:8px;height:8px;border:0;background:linear-gradient(45deg,transparent 44%,var(--crit) 44%,var(--crit) 56%,transparent 56%),linear-gradient(-45deg,transparent 44%,var(--crit) 44%,var(--crit) 56%,transparent 56%)}
+
+/* ============ CHART FRAME ============ */
+.fig{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:22px 22px 16px;box-shadow:var(--shadow)}
+.fig .fig-t{font-family:var(--f-disp);font-weight:700;font-size:1.02rem;letter-spacing:-.01em}
+.fig .fig-s{font-family:var(--f-mono);font-size:.7rem;color:var(--ink-3);letter-spacing:.06em;margin-top:3px}
+.fig .fig-n{font-family:var(--f-mono);font-size:.66rem;color:var(--ink-3);margin-top:10px;letter-spacing:.03em}
+.axis{font-family:var(--f-mono);font-size:11px;fill:var(--ink-3)}
+.gridline{stroke:var(--grid);stroke-width:1}
+.dlabel{font-family:var(--f-mono);font-size:11.5px;font-weight:600;fill:var(--ink-2)}
+.dlabel-strong{font-family:var(--f-disp);font-size:13px;font-weight:700;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.legend .li{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-2)}
+.legend .sw{width:11px;height:11px;border-radius:3px}
+
+/* ============ DOSSIERS ============ */
+.dossier{border-top:4px solid var(--bc,var(--accent));display:flex;flex-direction:column;gap:16px}
+.dossier .head{display:flex;align-items:center;gap:14px}
+.mono-badge{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-disp);font-weight:900;font-size:1.3rem;color:#fff;background:var(--bc,var(--accent));flex:none}
+.dossier .who .n{font-family:var(--f-disp);font-weight:800;font-size:1.3rem;letter-spacing:-.01em}
+.dossier .who .r{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.dossier .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:.88rem;border:1px dashed var(--line);border-radius:8px;padding:12px 14px}
+.dossier .facts .k{font-family:var(--f-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.dossier .facts .v{font-weight:600;font-size:.9rem}
+.story{font-size:.98rem;color:var(--ink-2)}
+.story::first-letter{font-family:var(--f-disp);font-weight:900;font-size:2.6em;float:left;line-height:.82;padding:2px 8px 0 0;color:var(--bc,var(--accent))}
+blockquote.pull{margin:4px 0 0;padding:14px 18px;border-left:3px solid var(--bc,var(--accent));background:var(--surface-2);border-radius:0 8px 8px 0;font-style:italic;font-size:1.04rem;line-height:1.45}
+blockquote.pull footer{font-style:normal;font-family:var(--f-mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.04em;border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--ink-2);background:var(--surface)}
+.chip.hot{border-color:var(--bc,var(--accent));color:var(--bc,var(--accent))}
+
+/* ============ MATRIX ============ */
+table.mx{border-collapse:collapse;width:100%;min-width:760px;font-size:.9rem}
+.mx th,.mx td{padding:10px 12px;border-bottom:1px solid var(--line-soft);text-align:center}
+.mx thead th{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:2px solid var(--line)}
+.mx td:first-child,.mx th:first-child{text-align:left}
+.mx td:first-child{font-family:var(--f-disp);font-weight:600;font-size:.88rem;white-space:nowrap}
+.mx td:first-child .gi{display:inline-block;vertical-align:-4px;margin-right:9px;color:var(--ink-3)}
+.pip{display:inline-block;width:16px;height:16px;border-radius:50%}
+.pip.full{background:var(--pc,var(--accent))}
+.pip.half{background:linear-gradient(90deg,var(--pc,var(--accent)) 50%,transparent 50%);border:2px solid var(--pc,var(--accent));width:12px;height:12px}
+.pip.none{border:2px solid var(--line);width:12px;height:12px}
+.mx tbody tr:hover td{background:var(--surface-2)}
+
+/* ============ TIMELINE ============ */
+.tl{position:relative;margin:0;padding:0 0 0 34px;list-style:none}
+.tl::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl li{position:relative;padding:0 0 34px}
+.tl li::before{content:"";position:absolute;left:-30px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--tc,var(--accent))}
+.tl .yr{font-family:var(--f-disp);font-weight:900;font-size:1.5rem;letter-spacing:-.02em;color:var(--tc,var(--accent));font-variant-numeric:tabular-nums}
+.tl .ti{font-family:var(--f-disp);font-weight:700;font-size:1.02rem;margin-top:2px}
+.tl p{font-size:.93rem;color:var(--ink-2);max-width:58ch;margin:6px 0 0}
+
+/* ============ FODA ============ */
+.foda{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.foda .card{border-top:4px solid var(--fc)}
+.foda h3{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.foda h3 .big-letter{font-family:var(--f-disp);font-weight:900;font-size:2.6rem;color:var(--fc);line-height:1}
+
+/* ============ QUESTIONS ============ */
+.qs{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.q{position:relative;overflow:hidden}
+.q .mark{position:absolute;right:6px;top:-18px;font-family:var(--f-disp);font-weight:900;font-size:6.4rem;color:var(--accent);opacity:.1;line-height:1}
+.q .qq{font-family:var(--f-disp);font-weight:700;font-size:1.18rem;letter-spacing:-.01em;line-height:1.3}
+.q p{font-size:.92rem;color:var(--ink-2);margin:10px 0 0}
+
+/* ============ GLOSSARY ============ */
+.gloss{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.gloss .card{display:flex;flex-direction:column;gap:10px;padding:20px}
+.gloss .gi{color:var(--accent-ink)}
+.gloss h4{font-size:1rem;font-weight:700}
+.gloss p{font-size:.88rem;color:var(--ink-2);margin:0}
+.gloss .en{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ============ QR ============ */
+.qrs{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.qr-card{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:22px 16px}
+.qr-box{background:#fff;border-radius:8px;padding:10px;border:1px solid var(--line)}
+.qr-box svg{width:110px;height:110px}
+.qr-card .n{font-family:var(--f-disp);font-weight:700;font-size:.92rem}
+.qr-card .u{font-family:var(--f-mono);font-size:.62rem;color:var(--ink-3);word-break:break-all}
+
+/* ============ SOURCES / FOOT ============ */
+.srcs{font-size:.86rem;color:var(--ink-2)}
+.srcs ol{padding-left:20px;display:flex;flex-direction:column;gap:6px;margin:0}
+.note{border-left:3px solid var(--warn);background:var(--surface);border-radius:0 8px 8px 0;padding:14px 18px;font-size:.9rem;color:var(--ink-2)}
+footer.colophon{border-top:1px solid var(--line);padding:34px 0 60px;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;color:var(--ink-3)}
+
+/* ============ REVEAL ============ */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  #hero .live .dot{animation:none}
+  html{scroll-behavior:auto}
+}
+</style>
+
+<!-- ================= TOPBAR ================= -->
+<div id="topbar">
+  <div class="in">
+    <div class="brand">RADAR<span>·</span>RETAIL INTEL</div>
+    <nav id="toc">
+      <a href="#resumen">Resumen</a>
+      <a href="#mercado">Mercado</a>
+      <a href="#jugadores">Jugadores</a>
+      <a href="#capacidades">Capacidades</a>
+      <a href="#posicionamiento">Mapa</a>
+      <a href="#historia">Historia</a>
+      <a href="#foda">FODA</a>
+      <a href="#insights">Insights</a>
+      <a href="#glosario">Glosario</a>
+      <a href="#fuentes">Fuentes</a>
+    </nav>
+    <div id="progress"></div>
+  </div>
+</div>
+
+<!-- ================= HERO ================= -->
+<div id="hero">
+  <div class="stage">
+    <canvas id="gatecanvas" aria-hidden="true"></canvas>
+    <div class="wrap content">
+      <div class="kicker">
+        <span class="live"><span class="dot"></span> Conteo en vivo: <span class="num" id="livecount">0</span> visitantes</span>
+      </div>
+      <h1>Radar Retail<br>Intelligence
+        <span class="thin">Cinco marcas que convierten pisadas en decisiones: Euler Labs frente a Keengo, RetailNext, RetailCheck y Sensormatic ShopperTrak.</span>
+      </h1>
+      <div class="stats">
+        <div class="stat"><div class="v num" data-count="5">5</div><div class="l">marcas analizadas</div></div>
+        <div class="stat"><div class="v num" data-count="12">12</div><div class="l">capacidades comparadas</div></div>
+        <div class="stat"><div class="v num">US$ 2.450M</div><div class="l">mercado people counting 2026</div></div>
+        <div class="stat"><div class="v num">16%</div><div class="l">crecimiento anual del sector</div></div>
+        <div class="stat"><div class="v num">40.000M</div><div class="l">visitas/año — mayor dataset del grupo</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RESUMEN EJECUTIVO ================= -->
+<section id="resumen">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 01</b> — Resumen ejecutivo</div>
+      <h2>Cinco formas de contar a la misma persona</h2>
+      <p class="lede">Las cinco marcas resuelven el mismo problema de fondo — la tienda física es una caja negra — pero lo atacan desde escalas y filosofías radicalmente distintas: dos gigantes globales de dato denso, dos especialistas regionales con décadas de terreno, y un challenger que apuesta a unificar señales que los demás no miran.</p>
+    </div>
+    <div class="grid insights">
+      <div class="card insight rv"><span class="tag">Escala</span>
+        <div class="big num">40.000M</div>
+        <p>Sensormatic ShopperTrak declara analizar 40.000 millones de visitas por año y RetailNext opera en más de 100 países. En volumen de dato, los globales juegan otra liga: su ventaja ya no es el sensor, es el <em>benchmark</em>.</p>
+      </div>
+      <div class="card insight rv"><span class="tag">Consolidación</span>
+        <div class="big num">dic 2024</div>
+        <p>Battery Ventures tomó participación mayoritaria en RetailNext con capital explícito para adquisiciones. El sector está en fase de consolidación: los especialistas regionales son blanco natural de compra.</p>
+      </div>
+      <div class="card insight rv"><span class="tag">Diferenciación</span>
+        <div class="big num">2/5</div>
+        <p>Solo dos marcas del grupo ofrecen hoy IA conversacional sobre los datos de tienda: RetailNext (Pulse AI) y Euler Labs (EulerIA vía WhatsApp). Euler compite en la frontera del producto, no en la retaguardia.</p>
+      </div>
+      <div class="card insight rv"><span class="tag">Hueco</span>
+        <div class="big num">Energía</div>
+        <p>Eulergy (optimización energética ligada a ocupación) no tiene equivalente en ninguno de los otros cuatro portafolios. Es la capacidad más diferencial del grupo y conecta analítica con ahorro medible en la factura.</p>
+      </div>
+      <div class="card insight rv"><span class="tag">Riesgo</span>
+        <div class="big num">Commodity</div>
+        <p>El conteo de personas puro se está comoditizando: las cinco marcas lo ofrecen. El valor migró hacia arriba — benchmarking, IA, prevención de pérdidas, inventario. Quien venda solo el sensor, compite por precio.</p>
+      </div>
+      <div class="card insight rv"><span class="tag">Territorio</span>
+        <div class="big num">LATAM</div>
+        <p>Keengo (Argentina) y RetailCheck (Chile + 5 países) prueban que hay mercado regional defendible: cercanía, servicio y precio local pesan frente a suites globales facturadas en dólares corporativos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SLIDE 02 ================= -->
+<div class="slide"><span class="n" aria-hidden="true">02</span>
+  <div class="wrap rv">
+    <div class="eyebrow">Capítulo 02 — El mercado</div>
+    <h2>La vereda se volvió medible</h2>
+    <p>Historia breve: durante un siglo, el retail físico midió una sola cosa — el ticket. Todo lo anterior a la caja registradora era intuición. Hoy, cada puerta es un punto de datos, y el mercado que los cuenta crece al doble de velocidad que el retail que los pisa.</p>
+  </div>
+</div>
+
+<!-- ================= MERCADO ================= -->
+<section id="mercado">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 02</b> — El mercado</div>
+      <h2>Un sector chico que crece rápido</h2>
+      <p class="lede">El mercado global de sistemas de conteo de personas pasará de US$ 2.120M (2025) a US$ 4.360M (2030) según The Business Research Company — un crecimiento anual compuesto de ~15–16%. La analítica retail ampliada, que engloba a estas cinco marcas, se estima entre US$ 7.000M y 11.000M según la definición del analista.</p>
+    </div>
+    <div class="fig rv">
+      <div class="fig-t">Mercado global de sistemas de conteo de personas</div>
+      <div class="fig-s">EN MILES DE MILLONES DE US$ · 2025–2030 · CAGR ≈ 15,4%</div>
+      <div class="scrollx">
+      <svg viewBox="0 0 720 300" width="100%" style="max-width:860px" role="img" aria-label="Barras: el mercado crece de 2,12 mil millones en 2025 a 4,36 mil millones de dólares en 2030">
+        <g>
+          <line class="gridline" x1="46" y1="250" x2="700" y2="250"/>
+          <line class="gridline" x1="46" y1="200" x2="700" y2="200" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="46" y1="150" x2="700" y2="150" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="46" y1="100" x2="700" y2="100" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="46" y1="50"  x2="700" y2="50"  stroke-dasharray="2 4"/>
+          <text class="axis" x="38" y="254" text-anchor="end">0</text>
+          <text class="axis" x="38" y="204" text-anchor="end">1</text>
+          <text class="axis" x="38" y="154" text-anchor="end">2</text>
+          <text class="axis" x="38" y="104" text-anchor="end">3</text>
+          <text class="axis" x="38" y="54"  text-anchor="end">4</text>
+        </g>
+        <defs>
+          <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="6" height="6" fill="var(--accent-soft)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--accent)" stroke-width="1.4" opacity=".55"/>
+          </pattern>
+        </defs>
+        <g class="bars">
+          <rect x="70"  y="144" width="64" height="106" rx="4" fill="var(--accent)"/>
+          <rect x="180" y="127.5" width="64" height="122.5" rx="4" fill="var(--accent)"/>
+          <rect x="290" y="108.5" width="64" height="141.5" rx="4" fill="url(#hatch)" stroke="var(--accent)" stroke-width="1.2"/>
+          <rect x="400" y="87" width="64" height="163" rx="4" fill="url(#hatch)" stroke="var(--accent)" stroke-width="1.2"/>
+          <rect x="510" y="61.5" width="64" height="188.5" rx="4" fill="url(#hatch)" stroke="var(--accent)" stroke-width="1.2"/>
+          <rect x="620" y="32" width="64" height="218" rx="4" fill="var(--accent)"/>
+        </g>
+        <g>
+          <text class="dlabel-strong" x="102" y="134" text-anchor="middle">2,12</text>
+          <text class="dlabel-strong" x="212" y="117" text-anchor="middle">2,45</text>
+          <text class="dlabel" x="322" y="98" text-anchor="middle">≈2,83</text>
+          <text class="dlabel" x="432" y="77" text-anchor="middle">≈3,26</text>
+          <text class="dlabel" x="542" y="51" text-anchor="middle">≈3,77</text>
+          <text class="dlabel-strong" x="652" y="22" text-anchor="middle">4,36</text>
+        </g>
+        <g class="axis">
+          <text x="102" y="272" text-anchor="middle">2025</text>
+          <text x="212" y="272" text-anchor="middle">2026</text>
+          <text x="322" y="272" text-anchor="middle">2027*</text>
+          <text x="432" y="272" text-anchor="middle">2028*</text>
+          <text x="542" y="272" text-anchor="middle">2029*</text>
+          <text x="652" y="272" text-anchor="middle">2030</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fig-n">* Años intermedios interpolados al CAGR publicado (15,4%). Extremos declarados por la fuente. Fuente: The Business Research Company, People Counting System Global Market Report.</div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:18px">
+      <div class="card rv">
+        <h3>Qué empuja el crecimiento</h3>
+        <div style="height:10px"></div>
+        <ul class="tally">
+          <li><b>Conversión como KPI rey:</b> sin tráfico no hay tasa de conversión; el conteo dejó de ser opcional para cadenas medianas.</li>
+          <li><b>Ocupación y climatización:</b> normativas y costos de energía convierten la ocupación en dato operativo, no solo comercial.</li>
+          <li><b>IA sobre el dato:</b> el valor migra del sensor al insight — copilotos conversacionales, forecasting, alertas.</li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <h3>Qué lo frena</h3>
+        <div style="height:10px"></div>
+        <ul class="tally">
+          <li><b>Privacidad:</b> GDPR/CCPA y normas locales exigen analítica sin identificación personal; los globales ya certifican (SOC, privacy by design).</li>
+          <li><b>Fatiga de dashboards:</b> el retailer mediano no tiene analistas; si el dato no llega masticado, no se usa.</li>
+          <li><b>Presión de precio:</b> hardware de conteo cada vez más barato comoditiza la capa base.</li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <h3>Lectura estratégica</h3>
+        <div style="height:10px"></div>
+        <p style="font-size:.95rem;color:var(--ink-2);margin:0">Un mercado que crece 15–16% anual con capa base comoditizada premia dos posiciones: <b>escala de dato</b> (benchmark imposible de replicar) o <b>profundidad de servicio local</b> (integración, idioma, precio). Las posiciones intermedias — global sin escala, local sin servicio — quedan expuestas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SLIDE 03 ================= -->
+<div class="slide"><span class="n" aria-hidden="true">03</span>
+  <div class="wrap rv">
+    <div class="eyebrow">Capítulo 03 — Los jugadores</div>
+    <h2>Cinco dossiers, cinco tesis</h2>
+    <p>Cada marca es una respuesta distinta a la misma pregunta: ¿qué pasa entre la puerta y la caja? Aquí, su ficha, su historia en cuatro líneas y la frase que mejor la define.</p>
+  </div>
+</div>
+
+<!-- ================= JUGADORES ================= -->
+<section id="jugadores">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 03</b> — Dossiers de marca</div>
+      <h2>Los cinco jugadores</h2>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(330px,1fr))">
+
+      <!-- EULER -->
+      <div class="card dossier rv" style="--bc:var(--c-euler)">
+        <div class="head">
+          <div class="mono-badge">E</div>
+          <div class="who">
+            <div class="n">Euler Labs</div>
+            <div class="r">Challenger · plataforma unificada</div>
+          </div>
+        </div>
+        <div class="facts">
+          <div><div class="k">Origen</div><div class="v">LATAM · hispano</div></div>
+          <div><div class="k">Modelo</div><div class="v">SaaS cloud, plug &amp; play</div></div>
+          <div><div class="k">Productos</div><div class="v">Dataview · EulerAudit · Eulergy · EulerIA</div></div>
+          <div><div class="k">Verticales</div><div class="v">Retail, shoppings, salud, deporte</div></div>
+        </div>
+        <p class="story">Mientras los grandes venden dashboards, Euler Labs apuesta a unificar señales dispersas — visitas, ocupación, clima, energía, POS — y devolverlas como respuestas simples. Su pieza más audaz no es un sensor: es EulerIA, un asistente que contesta por WhatsApp lo que antes exigía un analista. Y su pieza más contracorriente es Eulergy, que convierte la ocupación en ahorro de energía: analítica que se paga sola.</p>
+        <blockquote class="pull">"Unificamos los datos para que comprendas el comportamiento de tus visitantes."
+          <footer>Mensaje central — eulerlabs.tech</footer>
+        </blockquote>
+        <div class="chips">
+          <span class="chip hot">IA por WhatsApp</span><span class="chip hot">Energía + ocupación</span><span class="chip">Auditoría móvil</span><span class="chip">LoRaWAN · 4G · PoE</span>
+        </div>
+      </div>
+
+      <!-- KEENGO -->
+      <div class="card dossier rv" style="--bc:var(--c-keengo)">
+        <div class="head">
+          <div class="mono-badge">K</div>
+          <div class="who">
+            <div class="n">Keengo</div>
+            <div class="r">Integrador local · hardware + datos</div>
+          </div>
+        </div>
+        <div class="facts">
+          <div><div class="k">Origen</div><div class="v">Buenos Aires, Argentina</div></div>
+          <div><div class="k">Modelo</div><div class="v">Soluciones integradas en tienda</div></div>
+          <div><div class="k">Productos</div><div class="v">Kmanager · RFID · antihurto · turnero · cartelería</div></div>
+          <div><div class="k">Clientes</div><div class="v">Coppel, Sodimac, Carrefour, Nike, Banco Galicia</div></div>
+        </div>
+        <p class="story">Keengo es el jugador de ferretería fina: cerraduras inteligentes, antenas antihurto, RFID, pantallas, turneros y hasta robots, todo bajo un mismo integrador porteño. Su tesis es que la tienda necesita un socio que toque fierros, no solo software. La lista de clientes — de Carrefour a Aerolíneas Argentinas — dice que la tesis funciona en su territorio.</p>
+        <blockquote class="pull">"¿Qué tanto conocés a tus clientes?"
+          <footer>Pregunta-gancho — keengo.net</footer>
+        </blockquote>
+        <div class="chips">
+          <span class="chip hot">Antihurto + RFID</span><span class="chip">Cartelería digital</span><span class="chip">Turnero</span><span class="chip">Robots</span>
+        </div>
+      </div>
+
+      <!-- RETAILNEXT -->
+      <div class="card dossier rv" style="--bc:var(--c-rnext)">
+        <div class="head">
+          <div class="mono-badge">R</div>
+          <div class="who">
+            <div class="n">RetailNext</div>
+            <div class="r">Líder global · plataforma IA</div>
+          </div>
+        </div>
+        <div class="facts">
+          <div><div class="k">Origen</div><div class="v">San José, EE.UU. · 2007</div></div>
+          <div><div class="k">Escala</div><div class="v">600+ retailers · 100+ países</div></div>
+          <div><div class="k">Capital</div><div class="v">US$ 261M · Battery Ventures (2024)</div></div>
+          <div><div class="k">Productos</div><div class="v">Traffic · Asset Protection · Aurora · Pulse AI</div></div>
+        </div>
+        <p class="story">Nacida en Silicon Valley, RetailNext construyó el sensor propio (Aurora), lo instaló en cien países y ahora monetiza la capa de arriba: Pulse AI responde en lenguaje natural sobre miles de millones de recorridos de compra. Con Battery Ventures como dueño mayoritario desde fines de 2024 y mandato de compra, es a la vez el competidor más sofisticado y el consolidador más probable del sector.</p>
+        <blockquote class="pull">"La IA vale lo que valen los datos que la alimentan."
+          <footer>Tesis de marca — retailnext.net</footer>
+        </blockquote>
+        <div class="chips">
+          <span class="chip hot">Pulse AI</span><span class="chip hot">Sensor Aurora</span><span class="chip">SOC · GDPR · CCPA</span><span class="chip">Asset Protection</span>
+        </div>
+      </div>
+
+      <!-- RETAILCHECK -->
+      <div class="card dossier rv" style="--bc:var(--c-rcheck)">
+        <div class="head">
+          <div class="mono-badge">C</div>
+          <div class="who">
+            <div class="n">RetailCheck</div>
+            <div class="r">Especialista regional · medición</div>
+          </div>
+        </div>
+        <div class="facts">
+          <div><div class="k">Origen</div><div class="v">Santiago de Chile · 2004</div></div>
+          <div><div class="k">Cobertura</div><div class="v">Chile, Argentina, Colombia, Perú, Paraguay, Uruguay</div></div>
+          <div><div class="k">Plataformas</div><div class="v">RetailReport · VemCount</div></div>
+          <div><div class="k">Clientes</div><div class="v">Cencosud, IRSA, Mall Plaza, Parque Arauco, Puma</div></div>
+        </div>
+        <p class="story">Veinte años contando gente en seis países hicieron de RetailCheck el medidor de cabecera de los grandes malls del cono sur. No pretende ser una suite: mide flujo, vitrinas, colas y demografía con sensores IP, y entrega el dato en dashboards que el operador de shopping ya conoce. Su foso competitivo es la relación de décadas con los dueños del metro cuadrado más caro de la región.</p>
+        <blockquote class="pull">"Información confiable para mejorar el desempeño del punto de venta."
+          <footer>Promesa de valor — retailcheck.net</footer>
+        </blockquote>
+        <div class="chips">
+          <span class="chip hot">Malls del cono sur</span><span class="chip">Demografía</span><span class="chip">Gestión de colas</span><span class="chip">6 países</span>
+        </div>
+      </div>
+
+      <!-- SENSORMATIC -->
+      <div class="card dossier rv" style="--bc:var(--c-senso)">
+        <div class="head">
+          <div class="mono-badge">S</div>
+          <div class="who">
+            <div class="n">Sensormatic · ShopperTrak</div>
+            <div class="r">Incumbente global · Johnson Controls</div>
+          </div>
+        </div>
+        <div class="facts">
+          <div><div class="k">Origen</div><div class="v">EE.UU. · Sensormatic 1966 · ShopperTrak 1993</div></div>
+          <div><div class="k">Dataset</div><div class="v">40.000M visitas/año</div></div>
+          <div><div class="k">Precisión</div><div class="v">Hasta 98% en conteo</div></div>
+          <div><div class="k">Suite</div><div class="v">Traffic · EAS antihurto · Inventario RFID</div></div>
+        </div>
+        <p class="story">Sensormatic inventó categorías: las antenas antihurto que suenan en cada puerta del mundo son suyas, y ShopperTrak fue pionero del conteo peatonal en los noventa. Hoy, bajo Johnson Controls, su arma es el benchmark: con 40.000 millones de visitas anuales puede decirle a un retailer no solo cuánta gente entró, sino cuánta entró en la competencia. Nadie más del grupo puede hacer esa frase.</p>
+        <blockquote class="pull">"40.000 millones de visitas al año, convertidas en decisiones."
+          <footer>Cifra insignia — sensormatic.com</footer>
+        </blockquote>
+        <div class="chips">
+          <span class="chip hot">Benchmark de mercado</span><span class="chip hot">EAS heredado</span><span class="chip">Market Intelligence</span><span class="chip">Academy en 9 idiomas</span>
+        </div>
+      </div>
+
+      <!-- LEYENDA DE LECTURA -->
+      <div class="card rv" style="display:flex;flex-direction:column;justify-content:center;gap:14px;background:var(--surface-2);border-style:dashed">
+        <div class="eyebrow">Cómo leer los dossiers</div>
+        <ul class="tally">
+          <li><b>Color</b> = identidad de marca en todo el reporte (gráficas, matriz, mapa, línea de tiempo).</li>
+          <li><b>Chips resaltados</b> = capacidades diferenciales frente al resto del grupo.</li>
+          <li><b>Citas</b> = mensajes reales o condensados del propio sitio de cada marca.</li>
+        </ul>
+        <div class="legend">
+          <span class="li"><span class="sw" style="background:var(--c-euler)"></span>Euler Labs</span>
+          <span class="li"><span class="sw" style="background:var(--c-keengo)"></span>Keengo</span>
+          <span class="li"><span class="sw" style="background:var(--c-rnext)"></span>RetailNext</span>
+          <span class="li"><span class="sw" style="background:var(--c-rcheck)"></span>RetailCheck</span>
+          <span class="li"><span class="sw" style="background:var(--c-senso)"></span>Sensormatic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SLIDE 04 ================= -->
+<div class="slide"><span class="n" aria-hidden="true">04</span>
+  <div class="wrap rv">
+    <div class="eyebrow">Capítulo 04 — Capacidades</div>
+    <h2>Doce capacidades, cara a cara</h2>
+    <p>La matriz que sigue cruza cada portafolio declarado contra doce capacidades. Círculo lleno: la ofrece. Medio círculo: parcial o acotada. Vacío: no aparece en su propuesta pública.</p>
+  </div>
+</div>
+
+<!-- ================= CAPACIDADES ================= -->
+<section id="capacidades">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 04</b> — Matriz de capacidades</div>
+      <h2>Quién ofrece qué</h2>
+      <p class="lede">Relevado de los sitios oficiales en agosto 2026. La matriz mide amplitud declarada de portafolio, no calidad de ejecución ni participación de mercado.</p>
+    </div>
+    <div class="fig rv">
+      <div class="scrollx">
+      <table class="mx">
+        <thead>
+          <tr>
+            <th>Capacidad</th>
+            <th style="color:var(--c-euler)">Euler Labs</th>
+            <th style="color:var(--c-keengo)">Keengo</th>
+            <th style="color:var(--c-rnext)">RetailNext</th>
+            <th style="color:var(--c-rcheck)">RetailCheck</th>
+            <th style="color:var(--c-senso)">Sensormatic</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span>Conteo de personas</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip full" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20h18M6 16v-5m6 5V8m6 8v-3"/></svg></span>Conversión &amp; POS</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip full" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>Ocupación &amp; permanencia</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip half" style="--pc:var(--c-keengo)"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip full" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Demografía &amp; heatmaps</td>
+            <td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip full" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span>Benchmarking de mercado</td>
+            <td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip half" style="--pc:var(--c-rnext)"></span></td><td><span class="pip half" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span>Antihurto (EAS)</td>
+            <td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l8-8 8 8-8 8z"/><circle cx="12" cy="12" r="2"/></svg></span>RFID / inventario</td>
+            <td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-senso)"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></svg></span>Cartelería digital</td>
+            <td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h6"/></svg></span>Filas &amp; turnos</td>
+            <td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-keengo)"></span></td><td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-rcheck)"></span></td><td><span class="pip none"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>Auditoría de tiendas</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>Eficiencia energética</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td><td><span class="pip none"></span></td></tr>
+          <tr><td><span class="gi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg></span>IA conversacional</td>
+            <td><span class="pip full" style="--pc:var(--c-euler)"></span></td><td><span class="pip none"></span></td><td><span class="pip full" style="--pc:var(--c-rnext)"></span></td><td><span class="pip none"></span></td><td><span class="pip half" style="--pc:var(--c-senso)"></span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="fig-n">● capacidad declarada · ◐ parcial o acotada · ○ no aparece en la propuesta pública. Relevado: agosto 2026.</div>
+    </div>
+
+    <div class="fig rv" style="margin-top:18px">
+      <div class="fig-t">Amplitud de portafolio</div>
+      <div class="fig-s">CAPACIDADES CUBIERTAS SOBRE 12 · PLENA = 1 · PARCIAL = 0,5</div>
+      <div class="scrollx">
+      <svg viewBox="0 0 720 240" width="100%" style="max-width:860px" role="img" aria-label="Barras horizontales: Sensormatic 8,5; RetailNext 7,5; Keengo 6,5; Euler Labs 6; RetailCheck 5,5 sobre 12 capacidades">
+        <g class="axis">
+          <line class="gridline" x1="150" y1="14" x2="150" y2="212"/>
+          <line class="gridline" x1="290" y1="14" x2="290" y2="212" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="430" y1="14" x2="430" y2="212" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="570" y1="14" x2="570" y2="212" stroke-dasharray="2 4"/>
+          <line class="gridline" x1="710" y1="14" x2="710" y2="212" stroke-dasharray="2 4"/>
+          <text x="150" y="230" text-anchor="middle">0</text>
+          <text x="290" y="230" text-anchor="middle">3</text>
+          <text x="430" y="230" text-anchor="middle">6</text>
+          <text x="570" y="230" text-anchor="middle">9</text>
+          <text x="710" y="230" text-anchor="middle">12</text>
+        </g>
+        <g>
+          <text class="dlabel" x="142" y="38" text-anchor="end">Sensormatic</text>
+          <rect x="150" y="24" width="396.7" height="22" rx="4" fill="var(--c-senso)"/>
+          <text class="dlabel-strong" x="554" y="40">8,5</text>
+          <text class="dlabel" x="142" y="78" text-anchor="end">RetailNext</text>
+          <rect x="150" y="64" width="350" height="22" rx="4" fill="var(--c-rnext)"/>
+          <text class="dlabel-strong" x="508" y="80">7,5</text>
+          <text class="dlabel" x="142" y="118" text-anchor="end">Keengo</text>
+          <rect x="150" y="104" width="303.3" height="22" rx="4" fill="var(--c-keengo)"/>
+          <text class="dlabel-strong" x="461" y="120">6,5</text>
+          <text class="dlabel" x="142" y="158" text-anchor="end">Euler Labs</text>
+          <rect x="150" y="144" width="280" height="22" rx="4" fill="var(--c-euler)"/>
+          <text class="dlabel-strong" x="438" y="160">6,0</text>
+          <text class="dlabel" x="142" y="198" text-anchor="end">RetailCheck</text>
+          <rect x="150" y="184" width="256.7" height="22" rx="4" fill="var(--c-rcheck)"/>
+          <text class="dlabel-strong" x="415" y="200">5,5</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fig-n">Índice derivado de la matriz superior. Amplitud ≠ profundidad: RetailCheck cubre menos frentes pero con foco total en medición; la puntuación no pondera calidad.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= POSICIONAMIENTO ================= -->
+<section id="posicionamiento">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 05</b> — Mapa competitivo</div>
+      <h2>Dónde juega cada uno</h2>
+      <p class="lede">Dos ejes definen el tablero: cuánto territorio cubre cada marca (eje vertical) y cuánto abarca su portafolio, del especialista puro a la suite integral (eje horizontal). El tamaño del punto aproxima la escala declarada de operación.</p>
+    </div>
+    <div class="fig rv">
+      <div class="fig-t">Mapa de posicionamiento competitivo</div>
+      <div class="fig-s">ALCANCE GEOGRÁFICO × AMPLITUD DE PORTAFOLIO · POSICIONES CUALITATIVAS</div>
+      <div class="scrollx">
+      <svg viewBox="0 0 720 470" width="100%" style="max-width:860px" role="img" aria-label="Mapa de dispersión con las cinco marcas: Sensormatic y RetailNext en el cuadrante global-suite; RetailCheck regional especialista; Keengo local con portafolio amplio; Euler Labs regional con portafolio medio">
+        <g>
+          <rect x="60" y="20" width="640" height="400" fill="none" stroke="var(--grid)"/>
+          <line class="gridline" x1="380" y1="20" x2="380" y2="420" stroke-dasharray="3 5"/>
+          <line class="gridline" x1="60" y1="220" x2="700" y2="220" stroke-dasharray="3 5"/>
+          <text class="axis" x="66" y="36">GLOBAL</text>
+          <text class="axis" x="66" y="414">LOCAL</text>
+          <text class="axis" x="694" y="440" text-anchor="end">SUITE INTEGRAL →</text>
+          <text class="axis" x="60" y="440">← ESPECIALISTA</text>
+          <text class="axis" x="70" y="230" opacity=".65">medición pura</text>
+        </g>
+        <g>
+          <circle cx="600" cy="56" r="34" fill="var(--c-senso)" opacity=".9" stroke="var(--surface)" stroke-width="2"/>
+          <text class="dlabel-strong" x="600" y="60" text-anchor="middle" fill="#fff" style="font-size:11px">SENSO</text>
+          <text class="dlabel" x="560" y="112" text-anchor="middle">Sensormatic · suite global + benchmark</text>
+
+          <circle cx="474" cy="150" r="27" fill="var(--c-rnext)" opacity=".9" stroke="var(--surface)" stroke-width="2"/>
+          <text class="dlabel-strong" x="474" y="154" text-anchor="middle" fill="#fff" style="font-size:11px">RNXT</text>
+          <text class="dlabel" x="474" y="196" text-anchor="middle">RetailNext · plataforma IA, 100+ países</text>
+
+          <circle cx="255" cy="288" r="17" fill="var(--c-rcheck)" opacity=".9" stroke="var(--surface)" stroke-width="2"/>
+          <text class="dlabel" x="255" y="330" text-anchor="middle">RetailCheck · medición, 6 países</text>
+
+          <circle cx="510" cy="368" r="15" fill="var(--c-keengo)" opacity=".9" stroke="var(--surface)" stroke-width="2"/>
+          <text class="dlabel" x="510" y="404" text-anchor="middle">Keengo · integrador AR, portafolio ancho</text>
+
+          <circle cx="392" cy="330" r="13" fill="var(--c-euler)" stroke="var(--surface)" stroke-width="2"/>
+          <circle cx="392" cy="330" r="22" fill="none" stroke="var(--c-euler)" stroke-width="1.5" stroke-dasharray="3 4"/>
+          <text class="dlabel-strong" x="392" y="300" text-anchor="middle">Euler Labs</text>
+          <text class="dlabel" x="380" y="372" text-anchor="middle" style="font-size:10.5px">rumbo: subir por dato + IA ↑</text>
+        </g>
+      </svg>
+      </div>
+      <div class="fig-n">Posiciones estimadas cualitativamente a partir de portafolio y cobertura declarados; el tamaño del círculo aproxima escala de operación. El anillo punteado marca a la marca focal del análisis.</div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:18px">
+      <div class="card rv"><h3>La lectura del cuadrante</h3><div style="height:8px"></div>
+        <p style="font-size:.94rem;color:var(--ink-2);margin:0">El cuadrante superior derecho (global + suite) está tomado y capitalizado: no es terreno para pelear de frente. El cuadrante inferior — cercanía — se gana con servicio, no con features. La diagonal libre está en el centro: <b>plataforma regional con capacidades de la liga global</b> (IA, energía, dato unificado) a costo y cercanía locales. Ahí apunta el anillo punteado.</p>
+      </div>
+      <div class="card rv"><h3>Fricciones previsibles</h3><div style="height:8px"></div>
+        <ul class="tally">
+          <li><b>Euler ↔ RetailCheck:</b> chocan hoy por los mismos malls y cadenas del cono sur.</li>
+          <li><b>Euler ↔ Keengo:</b> chocan en Argentina, pero con portafolios casi complementarios (software/dato vs. hardware/seguridad).</li>
+          <li><b>Globales ↓ región:</b> RetailNext ya factura en LATAM vía marcas globales; baja con el estándar corporativo del cliente multinacional.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SLIDE 06 ================= -->
+<div class="slide"><span class="n" aria-hidden="true">06</span>
+  <div class="wrap rv">
+    <div class="eyebrow">Capítulo 06 — Historia</div>
+    <h2>Sesenta años en una línea</h2>
+    <p>De la antena antihurto de 1966 al copiloto de IA de 2025: la industria completa cabe en ocho hitos, y los últimos tres ocurrieron en apenas veinticuatro meses.</p>
+  </div>
+</div>
+
+<!-- ================= TIMELINE ================= -->
+<section id="historia">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 06</b> — Línea de tiempo</div>
+      <h2>Hitos del sector</h2>
+    </div>
+    <ul class="tl">
+      <li class="rv" style="--tc:var(--c-senso)">
+        <div class="yr num">1966</div><div class="ti">Nace Sensormatic</div>
+        <p>Se funda en EE.UU. la empresa que inventará la vigilancia electrónica de artículos (EAS). Sus antenas antihurto se convertirán en el objeto más ubicuo del retail físico mundial.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-senso)">
+        <div class="yr num">1993</div><div class="ti">ShopperTrak: contar es estrategia</div>
+        <p>ShopperTrak es pionera del conteo peatonal comercial: por primera vez el tráfico de la tienda se vuelve una serie de datos comparable, la semilla del benchmarking de mercado.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-rcheck)">
+        <div class="yr num">2004</div><div class="ti">RetailCheck lleva la medición a LATAM</div>
+        <p>Desde Santiago de Chile, RetailCheck empieza a instalar sensores de conteo en malls y cadenas del cono sur; llegará a operar en seis países de la región.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-rnext)">
+        <div class="yr num">2007</div><div class="ti">RetailNext: la era del video analítico</div>
+        <p>En Silicon Valley nace RetailNext, que fusiona video inteligente, Wi-Fi y POS. Levantará US$ 261M y desplegará su sensor propio Aurora en más de 100 países.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-senso)">
+        <div class="yr num">2016</div><div class="ti">La gran consolidación</div>
+        <p>Tyco adquiere ShopperTrak (US$ 175M) y luego se fusiona con Johnson Controls: conteo, antihurto e inventario quedan bajo un mismo techo — nace la Sensormatic Solutions actual.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-rnext)">
+        <div class="yr num">2022</div><div class="ti">RetailNext absorbe Ipsos Retail Performance</div>
+        <p>La compra de la unidad de conteo de Ipsos amplía su base instalada y confirma el patrón: los medidores independientes van siendo absorbidos por las plataformas.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-rnext)">
+        <div class="yr num">2024</div><div class="ti">Battery Ventures toma el control de RetailNext</div>
+        <p>Cierre en diciembre 2024 (anuncio en enero 2025): inversión mayoritaria con capital destinado a adquisiciones. En 2024 RetailNext promedió 1.200 instalaciones mensuales.</p>
+      </li>
+      <li class="rv" style="--tc:var(--c-euler)">
+        <div class="yr num">2025–26</div><div class="ti">La capa conversacional</div>
+        <p>El insight deja de vivir en el dashboard: RetailNext lanza Pulse AI y Euler Labs pone a EulerIA a responder por WhatsApp. La interfaz del retail analytics empieza a ser una conversación.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= SLIDE 07 ================= -->
+<div class="slide"><span class="n" aria-hidden="true">07</span>
+  <div class="wrap rv">
+    <div class="eyebrow">Capítulo 07 — Diagnóstico</div>
+    <h2>El tablero, visto desde Euler</h2>
+    <p>Con el mapa, la matriz y la historia sobre la mesa, el diagnóstico FODA de la marca focal se escribe casi solo. Casi.</p>
+  </div>
+</div>
+
+<!-- ================= FODA ================= -->
+<section id="foda">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 07</b> — FODA de Euler Labs</div>
+      <h2>Fortalezas, huecos y amenazas reales</h2>
+    </div>
+    <div class="grid foda">
+      <div class="card rv" style="--fc:var(--good)">
+        <h3><span class="big-letter">F</span>Fortalezas</h3>
+        <ul class="tick">
+          <li>Portafolio inusual: energía (Eulergy) + IA por WhatsApp (EulerIA) + auditoría móvil no existen juntos en ningún rival.</li>
+          <li>SaaS 100% cloud, plug &amp; play: despliegue liviano frente a proyectos de integración pesados.</li>
+          <li>Integración multi-fuente (sensores, POS, clima, LoRaWAN/4G/PoE): la tesis de unificación es creíble técnicamente.</li>
+          <li>Cercanía e idioma: soporte y precio pensados para el operador latinoamericano.</li>
+        </ul>
+      </div>
+      <div class="card rv" style="--fc:var(--crit)">
+        <h3><span class="big-letter">D</span>Debilidades</h3>
+        <ul class="tick cross">
+          <li>Sin antihurto ni RFID: queda fuera de licitaciones que piden seguridad + analítica en un solo proveedor.</li>
+          <li>Sin benchmarking: no puede responder "¿y contra el mercado?", la pregunta que Sensormatic monopoliza.</li>
+          <li>Prueba social pública escasa frente a las listas de clientes de Keengo, RetailCheck o RetailNext.</li>
+          <li>Marca joven en un sector que compra trayectoria: 20–60 años de historia enfrente.</li>
+        </ul>
+      </div>
+      <div class="card rv" style="--fc:var(--accent)">
+        <h3><span class="big-letter">O</span>Oportunidades</h3>
+        <ul class="tick">
+          <li>Mercado creciendo ~16% anual con capa base comoditizada: premio a quien suba de capa (IA, energía, forecasting).</li>
+          <li>Benchmark LATAM vacante: nadie publica un índice regional de tráfico; quien lo construya, fija la referencia.</li>
+          <li>Agenda ESG/costo energético: Eulergy convierte la analítica en ahorro auditable — un ROI que firma el CFO.</li>
+          <li>Alianzas con integradores de hardware (perfil Keengo) para entrar en cuentas que exigen fierros + software.</li>
+        </ul>
+      </div>
+      <div class="card rv" style="--fc:var(--warn)">
+        <h3><span class="big-letter">A</span>Amenazas</h3>
+        <ul class="tick cross">
+          <li>RetailNext capitalizado y en modo adquisición puede comprar presencia regional de un día para otro.</li>
+          <li>Sensormatic baja precios apalancada en escala Johnson Controls y en el argumento del benchmark.</li>
+          <li>Commoditización acelerada del conteo: sensores low-cost erosionan el precio de entrada.</li>
+          <li>Clientes multinacionales estandarizan proveedor global desde casa matriz, cerrando la puerta local.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INSIGHTS + PREGUNTAS ================= -->
+<section id="insights">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 08</b> — Insights accionables</div>
+      <h2>Qué haría el radar</h2>
+      <p class="lede">Tres jugadas surgen directamente del análisis, y cuatro preguntas disparadoras quedan abiertas para la mesa de estrategia.</p>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card rv" style="border-top:4px solid var(--c-euler)">
+        <div class="eyebrow" style="color:var(--c-euler)">Jugada 01</div>
+        <h3 style="margin-top:8px">Vender el vatio, no el visitante</h3>
+        <div style="height:8px"></div>
+        <p style="font-size:.94rem;color:var(--ink-2);margin:0">Liderar la conversación comercial con Eulergy: es la única capacidad sin competencia directa en el grupo y la única con ROI en la factura de luz. El conteo entra después, como consecuencia natural del mismo sensor.</p>
+      </div>
+      <div class="card rv" style="border-top:4px solid var(--c-euler)">
+        <div class="eyebrow" style="color:var(--c-euler)">Jugada 02</div>
+        <h3 style="margin-top:8px">Construir el índice LATAM</h3>
+        <div style="height:8px"></div>
+        <p style="font-size:.94rem;color:var(--ink-2);margin:0">Publicar un índice regional de tráfico retail (anónimo y agregado) con los clientes propios. Es la versión regional del foso de Sensormatic: cada cliente nuevo hace el benchmark más valioso y la salida más cara.</p>
+      </div>
+      <div class="card rv" style="border-top:4px solid var(--c-euler)">
+        <div class="eyebrow" style="color:var(--c-euler)">Jugada 03</div>
+        <h3 style="margin-top:8px">WhatsApp como interfaz, no como feature</h3>
+        <div style="height:8px"></div>
+        <p style="font-size:.94rem;color:var(--ink-2);margin:0">EulerIA compite contra Pulse AI con una ventaja cultural: en LATAM el gerente de tienda vive en WhatsApp, no en un dashboard. Convertir cada alerta y cada reporte en conversación es diferenciación defendible hoy.</p>
+      </div>
+    </div>
+    <div style="height:26px"></div>
+    <div class="grid qs">
+      <div class="card q rv"><span class="mark">?</span>
+        <div class="qq">¿Euler compite por producto o por cercanía?</div>
+        <p>Las dos cosas no se sostienen a la vez con recursos de challenger. Si es producto, hay que ganar la comparación de features contra RetailNext; si es cercanía, hay que ganar el servicio contra RetailCheck. ¿Cuál pierde primero?</p>
+      </div>
+      <div class="card q rv"><span class="mark">?</span>
+        <div class="qq">¿El antihurto es un hueco o una virtud?</div>
+        <p>No tener EAS/RFID cierra licitaciones integrales, pero mantiene el foco y evita competir con Sensormatic en su territorio histórico. ¿Se resuelve con alianza en lugar de producto?</p>
+      </div>
+      <div class="card q rv"><span class="mark">?</span>
+        <div class="qq">¿Qué pasa si RetailNext compra en la región?</div>
+        <p>Battery Ventures dejó capital para adquisiciones y el patrón (Ipsos 2022) ya existe. Si mañana compra un medidor latinoamericano, ¿cuál es el plan: diferenciarse más rápido o ser el objetivo atractivo?</p>
+      </div>
+      <div class="card q rv"><span class="mark">?</span>
+        <div class="qq">¿Quién firma el cheque: comercial, operaciones o energía?</div>
+        <p>Cada rival le vende a un comprador distinto (marketing, seguridad, operaciones). El portafolio de Euler toca tres presupuestos a la vez — ¿es una fortaleza de venta cruzada o una historia difícil de contar en una reunión?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GLOSARIO ================= -->
+<section id="glosario">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 09</b> — Glosario visual</div>
+      <h2>El idioma del sector, en diez fichas</h2>
+    </div>
+    <div class="grid gloss">
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a7 7 0 0 1 12-5"/><path d="M17 3v18" stroke-dasharray="3 3"/><path d="M20 8l-3 3-3-3" opacity="0"/></svg></span>
+        <h4>Conteo de personas <span class="en">people counting</span></h4>
+        <p>Medición automática de cuántas personas cruzan un acceso. La materia prima de todo lo demás: sin tráfico no hay conversión.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16"/><path d="M7 20V9l5-4 5 4v11"/><path d="M10 20v-5h4v5"/></svg></span>
+        <h4>Tasa de conversión <span class="en">conversion rate</span></h4>
+        <p>Tickets emitidos ÷ visitantes. El KPI que une la puerta con la caja y justifica dotaciones, horarios y layouts.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+        <h4>Permanencia <span class="en">dwell time</span></h4>
+        <p>Cuánto tiempo pasa el visitante en la tienda o frente a una zona. Correlaciona con intención de compra y con la eficacia del layout.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" opacity=".5"/><rect x="9" y="9" width="6" height="6" fill="currentColor" opacity=".35" stroke="none"/></svg></span>
+        <h4>Mapa de calor <span class="en">heatmap</span></h4>
+        <p>Visualización de las zonas más y menos transitadas del local. Revela vitrinas muertas y pasillos de oro.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <h4>EAS / Antihurto <span class="en">electronic article surveillance</span></h4>
+        <p>Etiquetas y antenas que detectan mercadería no desactivada en la salida. Categoría inventada por Sensormatic en los años 60.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 0 1 12 0" opacity=".5"/><path d="M3 9a9 9 0 0 1 18 0" opacity=".3"/><rect x="9" y="12" width="6" height="8" rx="1"/></svg></span>
+        <h4>RFID <span class="en">radio frequency ID</span></h4>
+        <p>Etiquetas por radiofrecuencia que identifican cada prenda o producto. Permite inventario en minutos y trazabilidad pieza a pieza.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l5-5 4 3 6-7 3 3" fill="none"/><path d="M3 21h18" opacity=".5"/></svg></span>
+        <h4>Benchmarking <span class="en">market intelligence</span></h4>
+        <p>Comparar el desempeño propio contra un índice de mercado anónimo. Solo puede ofrecerlo quien agrega datos de muchos retailers.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 17a5 5 0 0 1 0-10 6 6 0 0 1 11.3 2A4.5 4.5 0 0 1 17 17z"/></svg></span>
+        <h4>SaaS plug &amp; play <span class="en">cloud, sin obra</span></h4>
+        <p>El sensor se instala, se conecta y reporta a la nube; el cliente paga suscripción y no administra servidores ni licencias.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>
+        <h4>Ocupación <span class="en">occupancy</span></h4>
+        <p>Personas presentes en simultáneo dentro del espacio. Insumo de seguridad, confort y — cruzada con climatización — de ahorro energético.</p>
+      </div>
+      <div class="card rv">
+        <span class="gi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5" opacity=".6"/></svg></span>
+        <h4>IA conversacional <span class="en">conversational analytics</span></h4>
+        <p>Preguntarle a los datos en lenguaje natural ("¿cómo vino el sábado vs. el anterior?") y recibir la respuesta, no el dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= QR + FUENTES ================= -->
+<section id="fuentes" style="padding-bottom:40px">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow"><b>Capítulo 10</b> — Verificación directa</div>
+      <h2>Escaneá y comprobalo</h2>
+      <p class="lede">Cada código QR lleva al sitio oficial analizado. Este reporte se construyó exclusivamente sobre lo que las propias marcas declaran en público, más fuentes de mercado citadas abajo.</p>
+    </div>
+    <div class="grid qrs">
+      <div class="card qr-card rv" style="border-top:4px solid var(--c-euler)">
+        <div class="qr-box"><svg viewBox="0 0 29 29" shape-rendering="crispEdges"><path fill="#131C26" d="M0 0h7v1h-7zM10 0h1v1h-1zM12 0h1v1h-1zM15 0h2v1h-2zM19 0h2v1h-2zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h2v1h-2zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM11 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h3v1h-3zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM11 3h2v1h-2zM16 3h2v1h-2zM19 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h2v1h-2zM13 4h3v1h-3zM18 4h2v1h-2zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM12 5h5v1h-5zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h3v1h-3zM15 7h1v1h-1zM19 7h1v1h-1zM0 8h1v1h-1zM2 8h5v1h-5zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h2v1h-2zM17 8h1v1h-1zM20 8h1v1h-1zM22 8h5v1h-5zM1 9h1v1h-1zM3 9h2v1h-2zM7 9h2v1h-2zM10 9h3v1h-3zM15 9h2v1h-2zM18 9h7v1h-7zM28 9h1v1h-1zM2 10h1v1h-1zM4 10h3v1h-3zM9 10h1v1h-1zM12 10h1v1h-1zM17 10h2v1h-2zM1 11h1v1h-1zM4 11h2v1h-2zM7 11h2v1h-2zM11 11h2v1h-2zM14 11h1v1h-1zM16 11h1v1h-1zM19 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h1v1h-1zM2 12h2v1h-2zM6 12h3v1h-3zM16 12h2v1h-2zM25 12h2v1h-2zM0 13h4v1h-4zM5 13h1v1h-1zM7 13h2v1h-2zM12 13h4v1h-4zM17 13h4v1h-4zM22 13h1v1h-1zM24 13h1v1h-1zM28 13h1v1h-1zM0 14h1v1h-1zM2 14h1v1h-1zM6 14h6v1h-6zM13 14h4v1h-4zM18 14h1v1h-1zM20 14h1v1h-1zM23 14h1v1h-1zM25 14h2v1h-2zM1 15h3v1h-3zM7 15h1v1h-1zM9 15h2v1h-2zM12 15h2v1h-2zM15 15h1v1h-1zM18 15h1v1h-1zM23 15h2v1h-2zM27 15h1v1h-1zM0 16h3v1h-3zM6 16h3v1h-3zM14 16h2v1h-2zM17 16h2v1h-2zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h1v1h-1zM2 17h1v1h-1zM4 17h2v1h-2zM10 17h2v1h-2zM15 17h10v1h-10zM26 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM3 18h2v1h-2zM6 18h4v1h-4zM11 18h1v1h-1zM17 18h1v1h-1zM22 18h2v1h-2zM26 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM4 19h1v1h-1zM11 19h2v1h-2zM14 19h1v1h-1zM16 19h1v1h-1zM20 19h2v1h-2zM23 19h2v1h-2zM27 19h1v1h-1zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h2v1h-2zM9 20h3v1h-3zM16 20h1v1h-1zM18 20h7v1h-7zM26 20h3v1h-3zM8 21h1v1h-1zM12 21h4v1h-4zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h5v1h-5zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h5v1h-5zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM10 23h2v1h-2zM13 23h1v1h-1zM15 23h1v1h-1zM17 23h4v1h-4zM24 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM8 24h5v1h-5zM14 24h2v1h-2zM20 24h5v1h-5zM26 24h3v1h-3zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM8 25h3v1h-3zM15 25h2v1h-2zM18 25h1v1h-1zM20 25h1v1h-1zM23 25h1v1h-1zM25 25h2v1h-2zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h2v1h-2zM11 26h1v1h-1zM13 26h1v1h-1zM18 26h1v1h-1zM21 26h7v1h-7zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h1v1h-1zM12 27h1v1h-1zM14 27h1v1h-1zM16 27h1v1h-1zM19 27h2v1h-2zM23 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM10 28h2v1h-2zM16 28h1v1h-1zM18 28h2v1h-2zM23 28h4v1h-4z"/></svg></div>
+        <div><div class="n">Euler Labs</div><div class="u">eulerlabs.tech</div></div>
+      </div>
+      <div class="card qr-card rv" style="border-top:4px solid var(--c-keengo)">
+        <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path fill="#131C26" d="M0 0h7v1h-7zM9 0h1v1h-1zM12 0h1v1h-1zM14 0h1v1h-1zM16 0h1v1h-1zM18 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM14 1h3v1h-3zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM11 2h2v1h-2zM15 2h2v1h-2zM18 2h1v1h-1zM20 2h3v1h-3zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h2v1h-2zM13 3h1v1h-1zM15 3h1v1h-1zM18 3h1v1h-1zM20 3h3v1h-3zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM11 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM20 4h3v1h-3zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM13 5h3v1h-3zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h7v1h-7zM8 7h5v1h-5zM14 7h1v1h-1zM16 7h1v1h-1zM0 8h1v1h-1zM2 8h5v1h-5zM18 8h5v1h-5zM0 9h1v1h-1zM2 9h1v1h-1zM4 9h2v1h-2zM7 9h1v1h-1zM9 9h3v1h-3zM13 9h1v1h-1zM16 9h1v1h-1zM19 9h1v1h-1zM23 9h1v1h-1zM0 10h1v1h-1zM2 10h5v1h-5zM9 10h1v1h-1zM12 10h4v1h-4zM17 10h5v1h-5zM23 10h2v1h-2zM1 11h5v1h-5zM7 11h1v1h-1zM9 11h1v1h-1zM12 11h2v1h-2zM16 11h3v1h-3zM20 11h1v1h-1zM24 11h1v1h-1zM1 12h2v1h-2zM4 12h1v1h-1zM6 12h3v1h-3zM10 12h1v1h-1zM12 12h1v1h-1zM14 12h1v1h-1zM17 12h2v1h-2zM20 12h1v1h-1zM22 12h3v1h-3zM0 13h1v1h-1zM2 13h4v1h-4zM19 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM0 14h1v1h-1zM2 14h1v1h-1zM4 14h1v1h-1zM6 14h7v1h-7zM15 14h7v1h-7zM23 14h2v1h-2zM0 15h1v1h-1zM2 15h2v1h-2zM5 15h1v1h-1zM7 15h1v1h-1zM10 15h2v1h-2zM14 15h1v1h-1zM16 15h5v1h-5zM24 15h1v1h-1zM0 16h1v1h-1zM2 16h2v1h-2zM6 16h1v1h-1zM8 16h2v1h-2zM11 16h1v1h-1zM16 16h5v1h-5zM22 16h1v1h-1zM8 17h3v1h-3zM12 17h5v1h-5zM20 17h2v1h-2zM0 18h7v1h-7zM13 18h2v1h-2zM16 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM22 18h3v1h-3zM0 19h1v1h-1zM6 19h1v1h-1zM8 19h1v1h-1zM12 19h2v1h-2zM16 19h1v1h-1zM20 19h2v1h-2zM23 19h1v1h-1zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM14 20h7v1h-7zM22 20h1v1h-1zM24 20h1v1h-1zM0 21h1v1h-1zM2 21h3v1h-3zM6 21h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM16 21h3v1h-3zM20 21h5v1h-5zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h1v1h-1zM8 22h1v1h-1zM10 22h3v1h-3zM21 22h2v1h-2zM24 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM14 23h4v1h-4zM19 23h3v1h-3zM24 23h1v1h-1zM0 24h7v1h-7zM8 24h4v1h-4zM19 24h6v1h-6z"/></svg></div>
+        <div><div class="n">Keengo</div><div class="u">keengo.net</div></div>
+      </div>
+      <div class="card qr-card rv" style="border-top:4px solid var(--c-rnext)">
+        <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path fill="#131C26" d="M0 0h7v1h-7zM8 0h1v1h-1zM13 0h1v1h-1zM18 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h4v1h-4zM14 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM11 2h6v1h-6zM18 2h1v1h-1zM20 2h3v1h-3zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h2v1h-2zM13 3h1v1h-1zM15 3h2v1h-2zM18 3h1v1h-1zM20 3h3v1h-3zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h4v1h-4zM14 4h1v1h-1zM18 4h1v1h-1zM20 4h3v1h-3zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM11 5h1v1h-1zM13 5h2v1h-2zM16 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h7v1h-7zM9 7h4v1h-4zM16 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM6 8h2v1h-2zM10 8h1v1h-1zM15 8h2v1h-2zM19 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM0 9h2v1h-2zM3 9h1v1h-1zM10 9h1v1h-1zM12 9h2v1h-2zM15 9h2v1h-2zM18 9h2v1h-2zM21 9h1v1h-1zM23 9h2v1h-2zM2 10h1v1h-1zM5 10h4v1h-4zM10 10h2v1h-2zM15 10h2v1h-2zM18 10h2v1h-2zM21 10h2v1h-2zM24 10h1v1h-1zM1 11h4v1h-4zM11 11h1v1h-1zM15 11h3v1h-3zM21 11h1v1h-1zM3 12h5v1h-5zM11 12h2v1h-2zM16 12h1v1h-1zM18 12h1v1h-1zM24 12h1v1h-1zM5 13h1v1h-1zM12 13h1v1h-1zM15 13h5v1h-5zM23 13h2v1h-2zM0 14h2v1h-2zM4 14h1v1h-1zM6 14h2v1h-2zM12 14h2v1h-2zM15 14h2v1h-2zM18 14h1v1h-1zM21 14h2v1h-2zM24 14h1v1h-1zM2 15h4v1h-4zM10 15h3v1h-3zM14 15h1v1h-1zM16 15h1v1h-1zM19 15h3v1h-3zM0 16h3v1h-3zM4 16h5v1h-5zM10 16h1v1h-1zM16 16h5v1h-5zM23 16h1v1h-1zM8 17h2v1h-2zM14 17h1v1h-1zM16 17h1v1h-1zM20 17h1v1h-1zM24 17h1v1h-1zM0 18h7v1h-7zM8 18h1v1h-1zM10 18h2v1h-2zM13 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM24 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM15 19h2v1h-2zM20 19h1v1h-1zM23 19h2v1h-2zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h1v1h-1zM11 20h2v1h-2zM14 20h7v1h-7zM24 20h1v1h-1zM0 21h1v1h-1zM2 21h3v1h-3zM6 21h1v1h-1zM10 21h1v1h-1zM12 21h2v1h-2zM15 21h1v1h-1zM17 21h1v1h-1zM20 21h1v1h-1zM22 21h2v1h-2zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h1v1h-1zM8 22h3v1h-3zM12 22h1v1h-1zM15 22h1v1h-1zM17 22h1v1h-1zM19 22h3v1h-3zM23 22h2v1h-2zM0 23h1v1h-1zM6 23h1v1h-1zM9 23h4v1h-4zM14 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM0 24h7v1h-7zM8 24h2v1h-2zM12 24h3v1h-3zM16 24h1v1h-1zM18 24h1v1h-1zM21 24h1v1h-1zM24 24h1v1h-1z"/></svg></div>
+        <div><div class="n">RetailNext</div><div class="u">retailnext.net</div></div>
+      </div>
+      <div class="card qr-card rv" style="border-top:4px solid var(--c-rcheck)">
+        <div class="qr-box"><svg viewBox="0 0 25 25" shape-rendering="crispEdges"><path fill="#131C26" d="M0 0h7v1h-7zM8 0h1v1h-1zM12 0h5v1h-5zM18 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h4v1h-4zM14 1h1v1h-1zM16 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h2v1h-2zM14 2h2v1h-2zM18 2h1v1h-1zM20 2h3v1h-3zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h2v1h-2zM13 3h4v1h-4zM18 3h1v1h-1zM20 3h3v1h-3zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM14 4h3v1h-3zM18 4h1v1h-1zM20 4h3v1h-3zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM12 5h1v1h-1zM14 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h7v1h-7zM8 7h1v1h-1zM10 7h1v1h-1zM14 7h3v1h-3zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h4v1h-4zM14 8h2v1h-2zM17 8h5v1h-5zM24 8h1v1h-1zM2 9h3v1h-3zM8 9h3v1h-3zM12 9h1v1h-1zM14 9h3v1h-3zM20 9h2v1h-2zM23 9h1v1h-1zM0 10h3v1h-3zM4 10h4v1h-4zM10 10h2v1h-2zM13 10h3v1h-3zM20 10h3v1h-3zM4 11h1v1h-1zM8 11h3v1h-3zM16 11h1v1h-1zM22 11h2v1h-2zM1 12h1v1h-1zM5 12h3v1h-3zM11 12h1v1h-1zM17 12h2v1h-2zM21 12h4v1h-4zM0 13h2v1h-2zM4 13h2v1h-2zM7 13h4v1h-4zM12 13h1v1h-1zM14 13h4v1h-4zM20 13h1v1h-1zM23 13h1v1h-1zM2 14h1v1h-1zM6 14h1v1h-1zM11 14h6v1h-6zM19 14h4v1h-4zM2 15h1v1h-1zM4 15h1v1h-1zM7 15h2v1h-2zM11 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM19 15h2v1h-2zM22 15h2v1h-2zM0 16h3v1h-3zM6 16h1v1h-1zM12 16h1v1h-1zM15 16h8v1h-8zM8 17h1v1h-1zM10 17h1v1h-1zM13 17h2v1h-2zM16 17h1v1h-1zM20 17h1v1h-1zM0 18h7v1h-7zM8 18h1v1h-1zM10 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM12 19h1v1h-1zM14 19h1v1h-1zM16 19h1v1h-1zM20 19h4v1h-4zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h3v1h-3zM16 20h7v1h-7zM0 21h1v1h-1zM2 21h3v1h-3zM6 21h1v1h-1zM9 21h2v1h-2zM12 21h2v1h-2zM15 21h1v1h-1zM17 21h3v1h-3zM22 21h3v1h-3zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h1v1h-1zM10 22h3v1h-3zM14 22h2v1h-2zM17 22h2v1h-2zM21 22h1v1h-1zM23 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM15 23h1v1h-1zM17 23h1v1h-1zM19 23h5v1h-5zM0 24h7v1h-7zM8 24h2v1h-2zM11 24h2v1h-2zM14 24h2v1h-2zM17 24h2v1h-2zM22 24h3v1h-3z"/></svg></div>
+        <div><div class="n">RetailCheck</div><div class="u">retailcheck.net</div></div>
+      </div>
+      <div class="card qr-card rv" style="border-top:4px solid var(--c-senso)">
+        <div class="qr-box"><svg viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#131C26" d="M0 0h7v1h-7zM12 0h1v1h-1zM18 0h1v1h-1zM21 0h2v1h-2zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM10 1h2v1h-2zM13 1h2v1h-2zM16 1h2v1h-2zM21 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h3v1h-3zM12 2h2v1h-2zM15 2h4v1h-4zM20 2h5v1h-5zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM12 3h1v1h-1zM21 3h1v1h-1zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM11 4h1v1h-1zM15 4h1v1h-1zM17 4h2v1h-2zM21 4h1v1h-1zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h1v1h-1zM13 5h1v1h-1zM16 5h1v1h-1zM18 5h1v1h-1zM20 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h1v1h-1zM11 7h2v1h-2zM14 7h1v1h-1zM22 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h3v1h-3zM12 8h1v1h-1zM14 8h2v1h-2zM17 8h1v1h-1zM20 8h1v1h-1zM22 8h2v1h-2zM25 8h2v1h-2zM29 8h3v1h-3zM0 9h1v1h-1zM2 9h1v1h-1zM4 9h2v1h-2zM9 9h3v1h-3zM15 9h1v1h-1zM18 9h2v1h-2zM21 9h3v1h-3zM28 9h3v1h-3zM1 10h3v1h-3zM5 10h4v1h-4zM11 10h2v1h-2zM15 10h2v1h-2zM18 10h1v1h-1zM20 10h2v1h-2zM24 10h2v1h-2zM28 10h1v1h-1zM30 10h1v1h-1zM2 11h1v1h-1zM4 11h1v1h-1zM9 11h2v1h-2zM14 11h3v1h-3zM22 11h2v1h-2zM26 11h7v1h-7zM2 12h2v1h-2zM5 12h2v1h-2zM9 12h1v1h-1zM12 12h3v1h-3zM16 12h5v1h-5zM24 12h1v1h-1zM26 12h2v1h-2zM31 12h2v1h-2zM1 13h3v1h-3zM5 13h1v1h-1zM11 13h4v1h-4zM16 13h1v1h-1zM20 13h2v1h-2zM23 13h1v1h-1zM26 13h2v1h-2zM29 13h1v1h-1zM31 13h2v1h-2zM0 14h4v1h-4zM6 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM12 14h2v1h-2zM17 14h3v1h-3zM22 14h1v1h-1zM25 14h5v1h-5zM31 14h1v1h-1zM0 15h1v1h-1zM8 15h2v1h-2zM11 15h1v1h-1zM14 15h2v1h-2zM19 15h1v1h-1zM22 15h1v1h-1zM24 15h2v1h-2zM27 15h4v1h-4zM32 15h1v1h-1zM0 16h2v1h-2zM3 16h1v1h-1zM5 16h2v1h-2zM8 16h1v1h-1zM11 16h1v1h-1zM13 16h2v1h-2zM17 16h3v1h-3zM22 16h4v1h-4zM27 16h3v1h-3zM32 16h1v1h-1zM0 17h5v1h-5zM7 17h1v1h-1zM9 17h2v1h-2zM12 17h4v1h-4zM17 17h4v1h-4zM22 17h5v1h-5zM29 17h4v1h-4zM1 18h7v1h-7zM11 18h2v1h-2zM15 18h1v1h-1zM19 18h1v1h-1zM23 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM29 18h2v1h-2zM32 18h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM11 19h1v1h-1zM13 19h1v1h-1zM16 19h3v1h-3zM20 19h1v1h-1zM22 19h2v1h-2zM25 19h1v1h-1zM28 19h4v1h-4zM0 20h1v1h-1zM3 20h5v1h-5zM9 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM16 20h1v1h-1zM19 20h1v1h-1zM22 20h1v1h-1zM24 20h2v1h-2zM27 20h3v1h-3zM31 20h1v1h-1zM0 21h2v1h-2zM5 21h1v1h-1zM7 21h2v1h-2zM10 21h1v1h-1zM13 21h2v1h-2zM16 21h3v1h-3zM20 21h1v1h-1zM22 21h2v1h-2zM27 21h4v1h-4zM0 22h1v1h-1zM2 22h1v1h-1zM6 22h3v1h-3zM15 22h3v1h-3zM20 22h1v1h-1zM25 22h1v1h-1zM30 22h2v1h-2zM0 23h1v1h-1zM2 23h2v1h-2zM7 23h1v1h-1zM9 23h2v1h-2zM12 23h1v1h-1zM18 23h2v1h-2zM22 23h1v1h-1zM25 23h2v1h-2zM29 23h2v1h-2zM32 23h1v1h-1zM0 24h2v1h-2zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM10 24h3v1h-3zM14 24h3v1h-3zM19 24h2v1h-2zM24 24h5v1h-5zM31 24h2v1h-2zM8 25h2v1h-2zM11 25h1v1h-1zM15 25h2v1h-2zM18 25h4v1h-4zM23 25h2v1h-2zM28 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM0 26h7v1h-7zM9 26h2v1h-2zM15 26h2v1h-2zM18 26h1v1h-1zM21 26h1v1h-1zM23 26h2v1h-2zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h2v1h-2zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h2v1h-2zM12 27h1v1h-1zM15 27h1v1h-1zM19 27h2v1h-2zM22 27h3v1h-3zM28 27h4v1h-4zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM9 28h1v1h-1zM13 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM22 28h1v1h-1zM24 28h6v1h-6zM31 28h2v1h-2zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM11 29h1v1h-1zM13 29h2v1h-2zM16 29h1v1h-1zM19 29h5v1h-5zM25 29h1v1h-1zM27 29h2v1h-2zM30 29h3v1h-3zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM10 30h2v1h-2zM13 30h1v1h-1zM16 30h1v1h-1zM18 30h3v1h-3zM24 30h1v1h-1zM27 30h3v1h-3zM31 30h2v1h-2zM0 31h1v1h-1zM6 31h1v1h-1zM11 31h3v1h-3zM15 31h2v1h-2zM20 31h1v1h-1zM22 31h1v1h-1zM27 31h4v1h-4zM0 32h7v1h-7zM8 32h1v1h-1zM10 32h2v1h-2zM13 32h2v1h-2zM17 32h1v1h-1zM20 32h1v1h-1zM22 32h1v1h-1zM24 32h4v1h-4zM31 32h1v1h-1z"/></svg></div>
+        <div><div class="n">Sensormatic</div><div class="u">sensormatic.com/es_es/traffic-insights</div></div>
+      </div>
+    </div>
+
+    <div style="height:34px"></div>
+    <div class="grid" style="grid-template-columns:1.4fr 1fr;gap:18px">
+      <div class="card srcs rv">
+        <h3>Fuentes</h3>
+        <div style="height:10px"></div>
+        <ol>
+          <li>Sitios oficiales: eulerlabs.tech · keengo.net · retailnext.net · retailcheck.net · sensormatic.com/es_es/traffic-insights (relevados 24-08-2026).</li>
+          <li>The Business Research Company — <em>People Counting System Global Market Report</em> (tamaño de mercado 2025–2030).</li>
+          <li>Business Wire / RetailNext Press — inversión mayoritaria de Battery Ventures (cierre dic-2024, anuncio ene-2025).</li>
+          <li>Crunchbase / Getlatka — financiamiento acumulado (US$ 261M) e ingresos estimados (US$ 35,2M, jul-2025) de RetailNext.</li>
+          <li>Registros públicos de la operación Tyco–ShopperTrak (2016, US$ 175M) y fusión Johnson Controls–Tyco (2016).</li>
+        </ol>
+      </div>
+      <div class="rv">
+        <div class="note">
+          <b>Metodología y límites.</b> Análisis documental sobre información pública declarada por cada marca; no incluye pruebas de producto ni datos de clientes. Las posiciones del mapa competitivo son cualitativas. Las cifras de mercado varían según la definición del analista. Por la política de contenido autocontenido de esta página no se incluyen fotografías de los productos: los QR llevan al material visual original de cada marca. Año de fundación de Keengo y de Euler Labs: no publicado en sus sitios.
+        </div>
+      </div>
+    </div>
+
+    <footer class="colophon">
+      RADAR RETAIL INTELLIGENCE · ANÁLISIS COMPETITIVO DE 5 MARCAS · ELABORADO 24-08-2026 · PALETA VALIDADA PARA DALTONISMO (CVD ΔE≥8) · TEMAS CLARO Y OSCURO
+    </footer>
+  </div>
+</section>
+
+<script>
+(function(){
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* reveal on scroll (IO + scroll fallback so nothing stays hidden) */
+  var els = Array.prototype.slice.call(document.querySelectorAll('.rv'));
+  function revealVisible(){
+    var vh = innerHeight;
+    els = els.filter(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.top < vh - 30 || r.bottom < vh){ el.classList.add('in'); return false; }
+      return true;
+    });
+  }
+  if(reduced){ els.forEach(function(el){ el.classList.add('in'); }); els = []; }
+  else {
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+      },{threshold:.08});
+      els.forEach(function(el){ io.observe(el); });
+    }
+    addEventListener('scroll', revealVisible, {passive:true});
+    revealVisible();
+  }
+
+  /* progress bar + toc highlight */
+  var prog = document.getElementById('progress');
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    prog.style.width = p + '%';
+    var cur = -1;
+    for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top < 140) cur = i; }
+    links.forEach(function(a,i){ a.classList.toggle('on', i===cur); });
+  }
+  addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  /* hero: people crossing a counting gate */
+  var cv = document.getElementById('gatecanvas'), counter = document.getElementById('livecount');
+  var total = 0;
+  if(cv){
+    var ctx = cv.getContext('2d');
+    var W,H,gateX, dots=[];
+    var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    var rootTheme = document.documentElement.getAttribute('data-theme');
+    if(rootTheme==='dark') dark = true; if(rootTheme==='light') dark = false;
+    var dotC   = dark ? 'rgba(166,179,191,.55)' : 'rgba(70,84,95,.4)';
+    var dotHot = dark ? '#4C82E8' : '#2E6FE0';
+    var gateC  = dark ? 'rgba(76,130,232,.5)' : 'rgba(46,111,224,.45)';
+    function size(){
+      W = cv.clientWidth; H = cv.clientHeight;
+      var d = devicePixelRatio||1;
+      cv.width = W*d; cv.height = H*d; ctx.setTransform(d,0,0,d,0,0);
+      gateX = W*0.62;
+    }
+    size(); addEventListener('resize', size);
+    function spawn(){
+      dots.push({x:-10, y: H*0.15 + Math.random()*H*0.75, v: .5+Math.random()*1.3, r: 2+Math.random()*2.2, hot:0, counted:false, wob: Math.random()*6.28});
+    }
+    for(var i=0;i<26;i++){ spawn(); dots[i].x = Math.random()*W; dots[i].counted = dots[i].x>gateX; if(dots[i].counted) total++; }
+    counter.textContent = total;
+    var pulses=[];
+    function frame(){
+      ctx.clearRect(0,0,W,H);
+      /* gate */
+      ctx.strokeStyle = gateC; ctx.lineWidth = 2; ctx.setLineDash([6,7]);
+      ctx.beginPath(); ctx.moveTo(gateX, H*0.06); ctx.lineTo(gateX, H*0.94); ctx.stroke(); ctx.setLineDash([]);
+      /* pulses */
+      for(var p=pulses.length-1;p>=0;p--){
+        var pl = pulses[p]; pl.r += 1.4; pl.a -= .025;
+        if(pl.a<=0){ pulses.splice(p,1); continue; }
+        ctx.strokeStyle = dark ? 'rgba(76,130,232,'+pl.a+')' : 'rgba(46,111,224,'+pl.a+')';
+        ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pl.x,pl.y,pl.r,0,6.283); ctx.stroke();
+      }
+      /* dots */
+      for(var i2=dots.length-1;i2>=0;i2--){
+        var o = dots[i2];
+        o.x += o.v; o.wob += .04; var yy = o.y + Math.sin(o.wob)*4;
+        if(!o.counted && o.x>=gateX){ o.counted=true; o.hot=1; total++; counter.textContent=total; pulses.push({x:gateX,y:yy,r:4,a:.6}); }
+        if(o.hot>0) o.hot-=.02;
+        ctx.fillStyle = o.hot>0 ? dotHot : dotC;
+        ctx.beginPath(); ctx.arc(o.x,yy,o.r,0,6.283); ctx.fill();
+        if(o.x>W+12){ dots.splice(i2,1); spawn(); }
+      }
+      requestAnimationFrame(frame);
+    }
+    if(!reduced){ requestAnimationFrame(frame); }
+    else {
+      /* static scene */
+      ctx.strokeStyle = gateC; ctx.lineWidth=2; ctx.setLineDash([6,7]);
+      ctx.beginPath(); ctx.moveTo(gateX,H*0.06); ctx.lineTo(gateX,H*0.94); ctx.stroke(); ctx.setLineDash([]);
+      dots.forEach(function(o){ ctx.fillStyle=dotC; ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,6.283); ctx.fill(); });
+      counter.textContent = total;
+    }
+  }
+})();
+</script>
